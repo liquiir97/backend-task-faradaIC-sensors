@@ -62,7 +62,7 @@ The approach used in this flow is that we have **ONE main DB (master)**, which i
     "sensorData": "string"  // Sensor data used for detection based on the sensor
   }
   ```
--**Response**:
+- **Response**:
 ```json
   {
     "deviceId": int,
