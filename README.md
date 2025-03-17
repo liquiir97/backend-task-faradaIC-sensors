@@ -2,112 +2,70 @@
 
 ![System Overview](https://github.com/liquiir97/backend-task-faradaIC-sensors/blob/main/Architecture1.png)
 
+## Data Transfer Architecture
 
-## Data transfer Architecture
+### High-Level Flow:
+  * Sensors read data from the outside world.
+  * Using IoT devices, data is sent to **CNS** in **ALOHA** mode.
+  * **CNS** receives data and stores it in a **MySQL DB**.
+  * **BAS** reads data from MySQL instances based on availability.
+  * **BAS** sends responses to devices (PC, mobile) for requested data.
 
-High level flow in this application is:
-  * sensors read data from outer world
-	* using IoT devices data is send to CNS in ALOHA mode
-	* CNS recives data and store it in MySQL DB
-	* BAS reads data from MySql instances based on availability
-	* BAS sends response to devices (PC, mobile) for requsted data
+The approach used in this flow is that we have **ONE main DB (master)**, which is used mostly for **write operations** (see image **Architecture1 MySQL write**). From this DB, we create several other DB replicas that will be used for **read operations**. **BAS** will access these DB replicas when data is requested. This approach achieves **real-time updating**: when data is written to the master DB, it is replicated to the replicas.
 
-Approach that is used in this flow is that we have ONE main DB(master) which is used in this case mostly for write operation (see on image Archictecture1 MySql write). From that DB we create several other DB, replicas, that will be used for reading operation. BAS will access to those DB when some data is requested. With this approach real-time updateting is almost achived, when data is written in main DB that that will be replicated to replicas.
+### Estimated Throughput Metrics:
+  * **1 device → 1 packet per hour (p/h)**
+  * **10,000 devices → 10,000 packets per hour (p/h)**
+  * **1 packet size → 100 bytes**
+  * **Packets per second** → `10000 p/h / 3600 s = 2.78 p/s`
+  * **Data size** → `2.78 p/s * 100 b = 278 b/s`
 
-### Provide estimated throughput metrics
-  * 1 device -> 1 p/h
-	* 10000 devices -> 10000 p/h
-	* 1 p size -> 100 b
-	* packet per seconds -> 10000 p/h / 3600 s = 2.78 p/s
-	* data size -> 2.78 p/s * 100 b = 278 b/s
+#### Per Day:
+  * **Packets per day** → `10000 p/h * 24 h = 240,000 p/d`
+  * **Total bytes per day** → `240,000 p/d * 100 b = 24,000,000 b/d`
+  * **Convert to GB** → `24,000,000 / (1024 * 1024 * 1024) = 0.024 GB/d`
+  
+#### Per Month:
+  * **0.024 GB/day = 0.72 GB/month**
 
-	* packet per day -> 10000 p/h * 24 h = 240000 p/d
-	* total bytes per day -> 240000 p/d * 100 b = 24000000 b/d
-	* convert to GB -> 24000000 % (1024 * 1024 * 1024) =  0.024 GB/d
-	* per month -> 0.024 GB/d = 0.72 GB/m
+### Potential Bottlenecks:
+  * **Master DB downtime**: A potential problem is when the master DB used for write operations is down. A solution can be to declare one of the replicas as a **vice-master**, so if the master is down, the vice-master steps up as the master DB.
+  * **Network latency**: If replicas are in different regions, it can cause latency.
+  * **High request volume**: If there are too many requests, delays may happen. Solutions include adding a **load balancer** for replicas, **adding indexes** in the DB, and increasing the number of **replicas**.
+  * **Too many write operations**: Adding additional resources or optimizing the database might be necessary.
 
-### Discuss potential bottlenecks
-  * for this approcah problem can be when master DB that is used for write operation is down. Solution can be to one of those replicas declare as vice master, so if master is down vice master step up as master DB
-	* network latency: in cases when replicas are in diferenet regions can couse latency
-	* if there is a lot of requests delay can happen, so adding load balancer for replicas, adding indexes in DB,adding more replicas
-	* to many write operation
+### Scaling for 100,000 Devices:
+  * Add more **replicas**.
+  * **Check and optimize indexes**.
+  * **Restructure DB tables** for better performance.
+  * Add a **load balancer** for DB read operations.
 
-### Explain how your solution would scale if device count increases to 100,000
-  * add more replicas
-	* check index
-	* restructure DB tables
-	* add load balancer for DB read operation
+---
 
 ## Downlink Management System
-General flow:
-	* BAS accepts request from PC/Mobile
-	* BAS sends request to CNS using REST
-	* CNS accepts request from BAS store it in master DB
-	* when brief window data is sent to devices
-	* status of checduled job is mapped based on succession of operation(scheduled, failed, finished, canceled, pending)
 
-### API
+### General Flow:
+  * **BAS** accepts requests from **PC** or **Mobile**.
+  * **BAS** sends requests to **CNS** using **REST**.
+  * **CNS** stores the requests in the master DB.
+  * When the scheduled window opens, data is sent to devices.
+  * The status of scheduled jobs is tracked based on their success (e.g., scheduled, failed, finished, canceled, pending).
 
-  1. schedule new
+### API Endpoints:
 
-	```json
-
-
-	/api/v1/downlink-packets:
-	POST: creating new request
-	body:
-	{
-		deviceId : int,
-		sensorData : string (some values for sensors that will be used for detections, based on sensor),
-	}
-
-	response:
-	{
-		downLinkId : int,
-		deviceId : int,
-		status : string ("scheduled"),
-		date_time : datetime,
-	};
-	```
-
-  3. get all 
-    /api/v1/downlink-packets
-	  GET
-	  response:
-	  [
-		  {
-        downLinkId : int,
-			  deviceId : int,
-			  status : string ("scheduled"),
-			  date_time : datetime,
-		  },
-		  {
-			  downLinkId : int,
-			  deviceId : int,
-			  status : string ("scheduled", "finished", "canceled"),
-			  date_time : datetime,
-
-		  }
-	  ];  
-  
-  4. get downlink-packet based on downlink 
-    GET
-	  /api/v1/downlink-packets/{downLinkId}
-	  reposnse
-	  {  
-		  downLinkId : int,
-		  deviceId : int,
-		  status : string ("scheduled", "finished", "canceled", ...),
-		  date_time : datetime,
-	  }
-  
- 5. cancel downlink-packets
-    DELETE
-	  /api/v1/downlink-packets/{downLinkId}
-	  response
-	  {
-		  downLinkId : int,
-		  deviceId : int,
-		  status : string ("canceled"),
-		  date_time : datetime,
-	  }
+#### 1. Schedule New Downlink Request
+- **POST** `/api/v1/downlink-packets`
+- **Request Body**:
+  ```json
+  {
+    "deviceId": int,
+    "sensorData": "string"  // Sensor data used for detection based on the sensor
+  }
+  ```
+-**Response**:
+```json
+  {
+    "deviceId": int,
+    "sensorData": "string"  // Sensor data used for detection based on the sensor
+  }
+  ```
