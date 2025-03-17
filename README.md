@@ -108,7 +108,7 @@ The approach used in this flow is that we have **ONE main DB (master)**, which i
   {
     "downLinkId" : "int",
     "deviceId": "int",
-    "status" : "string" "(canceled")",
+    "status" : "string" "(canceled)",
     "date_time" : "datetime",
   }
   ```
