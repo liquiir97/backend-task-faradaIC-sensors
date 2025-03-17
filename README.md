@@ -67,8 +67,8 @@ The approach used in this flow is that we have **ONE main DB (master)**, which i
   {
     "downLinkId" : "int",
     "deviceId": "int",
-    "status" : "string" ("scheduled"),
-		  "date_time" : "datetime",
+    "status" : "string" "(scheduled)",
+    "date_time" : "datetime",
   }
   ```
 
@@ -79,14 +79,14 @@ The approach used in this flow is that we have **ONE main DB (master)**, which i
    {
     "downLinkId" : "int",
     "deviceId": "int",
-    "status" : "string" ("scheduled"),
-		  "date_time" : "datetime",
+    "status" : "string" "(scheduled)",
+    "date_time" : "datetime",
    },
    {
     "downLinkId" : "int",
     "deviceId": "int",
-    "status" : "string" ("finished"),
-		  "date_time" : "datetime",
+    "status" : "string" "(finished)",
+    "date_time" : "datetime",
    }
  ]
   ```
@@ -94,26 +94,22 @@ The approach used in this flow is that we have **ONE main DB (master)**, which i
 - **GET** `/api/v1/downlink-packets/{downLinkId}`
 - **Response**:
 ```json
-  - **Response**:
-```json
   {
     "downLinkId" : "int",
     "deviceId": "int",
-    "status" : "string" ("scheduled", "finished", "canceled", ...),
-		  "date_time" : "datetime",
+    "status" : "string" "(scheduled, finished, canceled, ...)",
+    "date_time" : "datetime",
   }
   ```
 
 - **DELETE** `/api/v1/downlink-packets/{downLinkId}`
 - **Response**:
 ```json
-  - **Response**:
-```json
   {
     "downLinkId" : "int",
     "deviceId": "int",
-    "status" : "string" ("canceled"),
-		  "date_time" : "datetime",
+    "status" : "string" "(canceled")",
+    "date_time" : "datetime",
   }
   ```
 
