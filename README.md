@@ -58,14 +58,62 @@ The approach used in this flow is that we have **ONE main DB (master)**, which i
 - **Request Body**:
   ```json
   {
-    "deviceId": int,
-    "sensorData": "string"  // Sensor data used for detection based on the sensor
+    "deviceId": "int",
+    "sensorData": "string"  "// Sensor data used for detection based on the sensor"
   }
   ```
 - **Response**:
 ```json
   {
-    "deviceId": int,
-    "sensorData": "string"  // Sensor data used for detection based on the sensor
+    "downLinkId" : "int",
+    "deviceId": "int",
+    "status" : "string" ("scheduled"),
+		  "date_time" : "datetime",
   }
   ```
+
+- **GET** `/api/v1/downlink-packets`
+- **Response**:
+```json
+  [
+   {
+    "downLinkId" : "int",
+    "deviceId": "int",
+    "status" : "string" ("scheduled"),
+		  "date_time" : "datetime",
+   },
+   {
+    "downLinkId" : "int",
+    "deviceId": "int",
+    "status" : "string" ("finished"),
+		  "date_time" : "datetime",
+   }
+ ]
+  ```
+
+- **GET** `/api/v1/downlink-packets/{downLinkId}`
+- **Response**:
+```json
+  - **Response**:
+```json
+  {
+    "downLinkId" : "int",
+    "deviceId": "int",
+    "status" : "string" ("scheduled", "finished", "canceled", ...),
+		  "date_time" : "datetime",
+  }
+  ```
+
+- **DELETE** `/api/v1/downlink-packets/{downLinkId}`
+- **Response**:
+```json
+  - **Response**:
+```json
+  {
+    "downLinkId" : "int",
+    "deviceId": "int",
+    "status" : "string" ("canceled"),
+		  "date_time" : "datetime",
+  }
+  ```
+
