@@ -48,24 +48,26 @@ General flow:
 
 ### API
 
-  1. schedule new 
-    /api/v1/downlink-packets:
-	  POST: creating new request
-	  body:
-	  {
-		  deviceId : int,
-		  sensorData : string (some values for sensors that will be used for detections, based on sensor),
-	  }
+  1. schedule new
+	```json
+	/api/v1/downlink-packets:
+	POST: creating new request
+	body:
+	{
+		deviceId : int,
+		sensorData : string (some values for sensors that will be used for detections, based on sensor),
+	}
 
-	  response:
-	  {
-		  downLinkId : int,
-		  deviceId : int,
-		  status : string ("scheduled"),
-		  date_time : datetime,
-	  };
+	response:
+	{
+		downLinkId : int,
+		deviceId : int,
+		status : string ("scheduled"),
+		date_time : datetime,
+	};
+	```
 
-  2. get all 
+  3. get all 
     /api/v1/downlink-packets
 	  GET
 	  response:
@@ -85,7 +87,7 @@ General flow:
 		  }
 	  ];  
   
-  3. get downlink-packet based on downlink 
+  4. get downlink-packet based on downlink 
     GET
 	  /api/v1/downlink-packets/{downLinkId}
 	  reposnse
@@ -96,7 +98,7 @@ General flow:
 		  date_time : datetime,
 	  }
   
- 4. cancel downlink-packets
+ 5. cancel downlink-packets
     DELETE
 	  /api/v1/downlink-packets/{downLinkId}
 	  response
